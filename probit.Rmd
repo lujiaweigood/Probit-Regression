@@ -1,0 +1,44 @@
+---
+title: "bayes"
+author: "Lu Jiawei"
+date: "1/30/2020"
+output: html_document
+---
+
+1)実データ、例えば  
+https://cran.r-project.org/web/packages/Ecdat/Ecdat.pdf  
+にあるデータなどを用い、  
+・プロビット回帰　・トービット回帰  
+
+プロビット回帰モデルで、分析するですが、同じく出力変数（被説明変数）のロジスティックモデルとの違いについては、判別したい２値について、説明変数のとりうる値の分布が別々の場合はロジットを使う場合が良いのに対して、説明変数のとりうる値の分布が共通の場合プロビット・モデルを使った方が良い。  
+この考え方のもとで、データを選ぶ。  
+Panel Datas of Individual Wages  
+というデータの正社員年数、既婚者と教育年数を選択する。  
+既婚者か否かを非説明変数、正社員年数と教育年数を説明変数にする。  
+
+まず正社員年数と教育年数をそれぞれ正規分布にしたがっているか検定する。  
+```{r}
+require(Ecdat)
+data(Wages)
+shapiro.test(Wages$ed)
+shapiro.test(Wages$exp)
+```
+両方ともp-value < 2.2e-16なので、二つの変数共に正規分布にしたがっていることがわかった。  
+
+```{r}
+
+
+df <- data.frame("ed" = Wages$ed,
+                     "exp" = Wages$exp,"married" = Wages$married)
+head(df)
+myprobit <- glm(married ~ ed+exp, family = binomial(link = "probit"), 
+    data = df)
+summary(myprobit)
+```
+
+考察:  
+正社員の年数だけ有意(5%)、という結果になった。  
+プロビット回帰の結果によると、教育程度と、結婚率の関係は有意ではない(5%)ことがわかった。結婚率は、教育程度よりも、正社員の年数に強く影響されていることがわかった。  
+
+
+
